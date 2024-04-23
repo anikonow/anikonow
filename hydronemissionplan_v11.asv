@@ -50,32 +50,39 @@ yInside = y(insideRectangle);
 sortedDots = sortrows([xInside, yInside], [2, 1]);
 
 %% Collision detection
-hydroneR= 20;
-
-for i=size(sortedDots, 1)
+hydroneR= 10;
+jj=1;
+ii=1;
+for i=1:size(sortedDots, 1)
     coltest= sortedDots(i,:);
     coltestx= [coltest(:,1)+hydroneR,coltest(:,2)];
     coltesty= [coltest(:,1),coltest(:,2)+hydroneR];
     coltestxn= [coltest(:,1)-hydroneR,coltest(:,2)];
     coltestyn= [coltest(:,1),coltest(:,2)-hydroneR];
 
-    if inpolygon(coltestx(:,1),coltestx(:,2),roiVertices(:, 1), roiVertices(:, 2)) && ...
-            inpolygon(coltestxn(:,1),coltestxn(:,2),roiVertices(:, 1), roiVertices(:, 2)) && ...
-            inpolygon(coltesty(:,1),coltesty(:,2),roiVertices(:, 1), roiVertices(:, 2)) && ...
-            inpolygon(coltestyn(:,1),coltestyn(:,2),roiVertices(:, 1), roiVertices(:, 2))
+    if inpolygon(coltestx(:,1),coltestx(:,2),roiVertices(:, 1), roiVertices(:, 2)) == 1 && ...
+            inpolygon(coltestxn(:,1),coltestxn(:,2),roiVertices(:, 1), roiVertices(:, 2)) == 1&& ...
+            inpolygon(coltesty(:,1),coltesty(:,2),roiVertices(:, 1), roiVertices(:, 2)) == 1&& ...
+            inpolygon(coltestyn(:,1),coltestyn(:,2),roiVertices(:, 1), roiVertices(:, 2)) == 1
         
-        validmesh= sortedDots(i,:);
+        validmesh(jj,:)= sortedDots(i,:);
+        jj=jj+1;
     else
-        invalidmesh= sortedDots(i,:);
+        invalidmesh(ii,:)= sortedDots(i,:);
+        ii=ii+1;
     end
-
+%fprintf("loop compleded %f\n", i)
 end
 
+cs = uavCoverageSpace(Polygons={},UseLocalCoordinates=false,ReferenceLocation=mwLS);
+
 figure;
+
 imshow("Hecken.jpg")
 hold on
-plot(validmesh(:,1),validmesh(:,2),'.','b')
-plot(sortedDots(:, 1), sortedDots(:, 2), '.','r');
+plot(validmesh(:,1),validmesh(:,2),'.')
+plot(invalidmesh(:,1),invalidmesh(:,2),'.')
+plot(sortedDots(:, 1), sortedDots(:, 2), 'square');
 plot(roiVertices(:, 1), roiVertices(:, 2), 'g', 'LineWidth', 2); % Show the drawpoly
 %
 set(gca, 'YDir', 'reverse');
@@ -94,7 +101,7 @@ function [x_distance_feet, y_distance_feet] = gps_to_feet(lat1, lon1, lat2, lon2
     y= lon1 - lon2;
 
     x_distance_feet=abs(x)*.25;
-    y_distance_feet=abs(y)*.25;
+    y_distance_feet=abs(y)*.25-.75;
 
 end
 

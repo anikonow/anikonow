@@ -74,6 +74,8 @@ for i=1:size(sortedDots, 1)
 %fprintf("loop compleded %f\n", i)
 end
 
+
+
 figure;
 
 imshow("Hecken.jpg")
@@ -84,8 +86,10 @@ plot(sortedDots(:, 1), sortedDots(:, 2), 'square');
 plot(roiVertices(:, 1), roiVertices(:, 2), 'g', 'LineWidth', 2); % Show the drawpoly
 %
 set(gca, 'YDir', 'reverse');
+
 xlabel('X-axis');
 ylabel('Y-axis');
+
 title('Waypoint Mission Planning');
 hold off;
 
