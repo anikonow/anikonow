@@ -1,6 +1,15 @@
-%% hydrone mission plan V1.1
-%implemented  drawpolygon feature for mission planner w/ mesh grid
+%% hydrone mission plan V1.2
+%v1.1 implemented  drawpolygon feature for mission planner w/ mesh grid
+%v1.2 implemented C-Space, Colision detection, 
+% simple horizontal waypoint points
 %
+%
+%
+%
+%
+%
+%
+
 clc
 clear
 
@@ -40,6 +49,11 @@ roiVertices(size(roiVertices,1),2)=roiVertices(1,2);
 
 close
 
+%Draw Obstacles
+
+%Draw Start and Stop Point
+
+
 % Create a rectangle using polygon vertices
 %Vertices = [5, 5; 15, 5; 15, 15; 5, 15; 5, 5]; %currently 10x10 box inside space
 insideRectangle = inpolygon(x, y, roiVertices(:, 1), roiVertices(:, 2));
@@ -50,7 +64,7 @@ yInside = y(insideRectangle);
 sortedDots = sortrows([xInside, yInside], [2, 1]);
 
 %% Collision detection
-hydroneR= 10;
+hydroneR= 15;
 jj=1;
 ii=1;
 for i=1:size(sortedDots, 1)
@@ -74,15 +88,33 @@ for i=1:size(sortedDots, 1)
 %fprintf("loop compleded %f\n", i)
 end
 
+%Lineverts=zeros(1,2);
+%% Create Simple Lawnmower
+PathStart=zeros(1,2);
+PathEnd= zeros(1,2);
 
-
+j=1;
+PathStart(1,:)=validmesh(1,:);
+for i=1:size(validmesh,1)-1
+    if norm([(validmesh(i+1,1)-validmesh(i,1)),(validmesh(i+1,2)-validmesh(i,2))],2)>=16
+        PathEnd(j,:)=validmesh(i,:);
+        PathStart(j+1,:) = validmesh(i+1,:);
+        j=j+1;
+        %fprintf("loop compleded %f\n", j)
+    end
+end
+PathEnd(j,:)= validmesh(size(validmesh,1),:);
 figure;
 
 imshow("Hecken.jpg")
 hold on
-plot(validmesh(:,1),validmesh(:,2),'.')
-plot(invalidmesh(:,1),invalidmesh(:,2),'.')
-plot(sortedDots(:, 1), sortedDots(:, 2), 'square');
+for j=1:size(PathStart,1)-1
+    plot([PathStart(j,1),PathEnd(j,1)],[PathStart(j,2),PathEnd(j,2)],'b', 'LineWidth', 1);
+    %fprintf('%f',j);
+end
+plot(validmesh(:,1),validmesh(:,2),'.','Color','g')
+plot(invalidmesh(:,1),invalidmesh(:,2),'.','Color','r')
+plot(sortedDots(:, 1), sortedDots(:, 2), 'square','MarkerSize',5,'Color','k');
 plot(roiVertices(:, 1), roiVertices(:, 2), 'g', 'LineWidth', 2); % Show the drawpoly
 %
 set(gca, 'YDir', 'reverse');
@@ -92,9 +124,6 @@ ylabel('Y-axis');
 
 title('Waypoint Mission Planning');
 hold off;
-
-
-
 
 
 function [x_distance_feet, y_distance_feet] = gps_to_feet(lat1, lon1, lat2, lon2)
