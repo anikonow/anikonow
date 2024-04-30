@@ -25,13 +25,35 @@ rectHeight = size(satim,1);
 x = xGrid(:);
 y = yGrid(:);
 
-% Draw a polygon and get its vertices
+%% Draw a polygon and get its vertices
 % figure;
 % plot(x, y, '.');
 % hold on
 % imshow(satim);
 % hold off
 % title('Draw a polygon for the region of interest');
+
+%% Draw obstacles
+% 
+% 
+
+
+%% Identify Events %% 
+%
+%
+%will change for drawn direction, check interor (sides-2)*180 = poly
+%
+%save interior events
+%
+%discritize cells, including drawn obstacles
+%
+%plot cells via lawn mower
+%
+%calculate cost of the discritized cells
+%
+%Choose lowest cost combination of cells
+
+
 
 %roi = drawpolygon;
 roiVertices = [448.810572687225	207.577092511013
@@ -206,6 +228,9 @@ ylabel('Y-axis');
 
 title('Waypoint Mission Planning');
 hold off;
+
+
+
 
 
 
