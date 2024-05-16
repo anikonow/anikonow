@@ -8,8 +8,11 @@ NED = zeros(3,1);
 data = readtable('SensorTest_data.csv');
 %% ASV IC and inputs
 roll = data.roll;
+roll= deg2rad(roll);
 pitch = data.pitch;
+pitch=deg2rad(pitch);
 yaw = data.yaw;
+yaw=deg2rad(yaw);
 depth_sensor_reading = data.Depth;
 latitude = data.Lat;
 longitude =data.Lon;

@@ -53,6 +53,19 @@ close
 
 %Draw Start and Stop Point
 
+%% Identify Events %% 
+%
+%will change for drawn direction, check interor (sides-2)*180 = poly
+%
+%save interior events
+%
+%discritize cells, including drawn obstacles
+%
+%plot cells via lawn mower
+%
+%calculate cost of the discritized cells
+%
+%Choose lowest cost combination of cells
 
 % Create a rectangle using polygon vertices
 %Vertices = [5, 5; 15, 5; 15, 15; 5, 15; 5, 5]; %currently 10x10 box inside space
@@ -64,7 +77,7 @@ yInside = y(insideRectangle);
 sortedDots = sortrows([xInside, yInside], [2, 1]);
 
 %% Collision detection
-hydroneR= 15;
+hydroneR= 12;
 jj=1;
 ii=1;
 for i=1:size(sortedDots, 1)
@@ -115,7 +128,7 @@ end
 plot(validmesh(:,1),validmesh(:,2),'.','Color','g')
 plot(invalidmesh(:,1),invalidmesh(:,2),'.','Color','r')
 plot(sortedDots(:, 1), sortedDots(:, 2), 'square','MarkerSize',5,'Color','k');
-plot(roiVertices(:, 1), roiVertices(:, 2), 'g', 'LineWidth', 2); % Show the drawpoly
+plot(roiVertices(:, 1), roiVertices(:, 2), 'k', 'LineWidth', 2); % Show the drawpoly
 %
 set(gca, 'YDir', 'reverse');
 

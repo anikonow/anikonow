@@ -102,41 +102,44 @@ q_check = zeros(size(double(data.imu_f.data), 1), 4);  % orientation estimates a
 p_cov_check= zeros( 9, 9,size(double(data.imu_f.data), 1));  % covariance matrices at each timestep
 
 % Set initial values.
-p_check = gtp(1, :);
-v_check = gtv(1, :);
-q_check = eul2quat(gtr(1, :),'XYZ');
-p_cov_check = zeros(9,9,2);  % covariance of estimate
+p_hat = gtp(1, :);
+v_hat = gtv(1, :);
+q_hat = eul2quat(gtr(1, :),'XYZ');
+p_cov_hat = zeros(9,9,2);  % covariance of estimate
 gnss_i  = 0;
 lidar_i = 0;
-
+Q=eye(6);
 x=0;
 y=0;
 z=0;
 % 5. Main Filter Loop
 for k = 2:length(imu_f_t)%
     % size(imu_f)  % start at 2 because we have initial prediction from gt
-    dt = imu_f_t(k) - imu_f_t(k - 1);
-    %Cns(:,:,k-1)=quat2rotm(q_check(k-1, :));
+     dt = imu_f_t(k) - imu_f_t(k - 1);
+     Cns=quat2rotm(q_hat)';
 
-    % 1. Update state with IMU inputs
-    x= x+ v_check(1,1)* cos(imu_f(k-1,3))*dt
-    y= y+ v_check(1,1)* sin(imu_f(k-1,3))*dt
-    
-    % 1.1 Linearize the motion model and compute Jacobians
+     accimu=Cns*imu_f(k-1,:)';
+     accvech=accimu+g';
 
-    % 2. Propagate uncertainty
+     p_check=p_hat+v_hat*dt*dt^2/2*accvech;
+     v_check= v_hat+accvech;
+     q_check= quatDyanmics(q_hat,imu_w(k-1,:),dt);
+
+     S= crossMat(accvech);
+     F= [eye(3) eye(3)*dt eye(3); zeros(3) eye(3) -S*dt; zeros(3) zeros(3) eye(3)  ];
+     Q= Q*dt;
+     p_cov_hat(:,:,k+1)= F*p_cov_hat(:,:,k-1)*F' +L*Q*L';
     
-    % 3. Check availability of GNSS and LIDAR measurements
 
 
 %% 
 
     if ismember(imu_f_t(k),lidar_t)
-        [index_lidar,col_lidar,tlidar]=find(lidar_t==imu_f_t(k))
-        y(k,:)=lidardata(index_lidar,:);
+        [index_lidar,col_lidar,tlidar]=find(lidar_t==imu_f_t(k));
+        y(k,:)=lidardata(index_lidar);
         Rlidar=var_lidar*eye(3);
         disp('lidar')
-        [p_hat, v_hat, q_hat, p_cov_hat] = ef_measurement_update(Rlidar, p_cov_check(:,:,k), y(k,:), p_check(k-1,:), v_check(k-1,:), q_check(k-1,:))
+        [p_hat, v_hat, q_hat, p_cov_hat] = ef_measurement_update(Rlidar, p_cov_check(:,:,k), y(k,:), p_check, v_check, q_check)
 
 
         % Update states (save)
@@ -144,7 +147,7 @@ for k = 2:length(imu_f_t)%
 
     elseif ismember(imu_f_t(k),gnss_t);
         [index_gnss,col_gnss,tgnss]=find(gnss_t==imu_f_t(k));
-        y(k,:)=gnss(index_gnss,:);
+        y(k,:)=gnss(index_gnss);
         Rgnss=var_gnss*eye(3);
         disp('gnss')
 
@@ -214,30 +217,44 @@ plot3(gtp(:,1),gtp(:,2),gtp(:,3),'r--');
 hold on
 plot3(p_check(:,1),p_check(:,2),p_check(:,3),'b');
 
+function qcheck =quatDyanmics(q_hat,imu_w,dt);
+q0= q_hat(1);
+q1= q_hat(2);
+q2= q_hat(3);
+q3= q_hat(4);
+w1= imu_w(1);
+w2=imu_w(2);
+w3=imu_w(3);
+body2quad= [q0 -q1 -q2 -q3; q1 q0 -q3 q2; q2 q3 q0 -q1; q3 -q2 q1 q0];
+bodyr= .5*body2quad*[0; w1;w2;w3];
+body=bodyr*dt+q_hat;
+qcheck=body/norm(body);
+end
+
 function [p_hat, v_hat, q_hat, p_cov_hat] = ef_measurement_update(sensor_var, p_cov_check, y_k, p_check, v_check, q_check)
 
-deltax=zeros(9,1)
-H=eye(3,9);
+    deltax=zeros(9,1);
+    H=eye(3,9);
 
-p_hat = p_check;
-v_hat = v_check;
-q_hat = q_check;
-p_cov_hat = p_cov_check;
+    p_hat = p_check;
+    v_hat = v_check;
+    q_hat = q_check;
+    p_cov_hat = p_cov_check;
 
-R = diag(sensor_var);
+    R = diag(sensor_var);
 
 % Compute Kalman Gain
-K = p_cov_hat * H' / (H * p_cov_hat * H' + R);
+    K = p_cov_hat * H' / (H * p_cov_hat * H' + R);
 % Compute error state
-deltax = K * (y_k-H* [p_hat ; v_hat ; quat2eul(q_hat)]);
+   %deltax = K * ( [p_hat ; v_hat ; quat2eul(q_hat)]');
 % Correct predicted state
 
 % Compute corrected covariance
-p_cov_hat= (eye(9)-K*H)*p_cov_check;
+    p_cov_hat= (eye(9)-K*H)*p_cov_check;
 %  return p_hat, v_hat, q_hat, p_cov_hat
-p_hat=p_hat+deltax(1:3);
-v_hat=v_hat+deltax(4:6);
-q_hat=quatmultiply(q_hat, eul2quat(deltax(7:9)', 'XYZ'));
+    p_hat=p_hat+deltax(1:3);
+    v_hat=v_hat+deltax(4:6);
+    q_hat=quatmultiply(q_hat, eul2quat(deltax(7:9)', 'XYZ'));
 
 end
 
