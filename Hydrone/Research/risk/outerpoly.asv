@@ -1,0 +1,157 @@
+%% create poly from border gps points %%
+
+clc
+clear
+close all
+
+outline=readtable("TestData\Test_12\test12_outline.txt");
+
+long0 = outline.GPSLongitude;
+lat0 = outline.GPSLatitude;
+alt0=outline.GPSElevation;
+
+
+refLat= 35.2271;  % Latitude of Charlotte, NC
+refLon = -80.8431; % Longitude of Charlotte, NC
+refAlt = 0;        % Altitude of Charlotte, NC 
+
+
+enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+easting= enu(:,1);
+northing= enu(:,2);
+alt=enu(:,3);
+i=1;
+j=2;
+
+%% filtering process to determine outline region %%
+
+% Replace with Kriging / Thinning Process %
+
+
+vert(i,:) = [easting(i),northing(i)];
+% fix this loop
+for i= 1:size(easting)-2
+    longdif = abs(easting(i)-easting(i+1));
+    latdif= abs(northing(i)-northing(i+1));
+    ang=atan2(latdif,longdif);
+
+    longdif = abs(easting(i+1)-easting(i+2));
+    latdif= abs(northing(i+1)-northing(i+2));
+    ang2=atan2(latdif,longdif);
+
+    
+    if abs(ang-ang2) > .2 && norm() > 1
+    vert(j,1)=easting(i+1,1);
+    vert(j,2)=northing(i+1,1);
+    j=j+1;
+    end
+
+end
+vert(size(vert,1)+1,:)=vert(1,:);
+
+
+figure
+hold on 
+plot(enu(:,1),enu(:,2),Linewidth=2)
+plot(vert(:,1),vert(:,2),LineWidth=2)
+
+[xGrid, yGrid] = meshgrid(linspace(min(easting), 1, max(easting)), linspace(min(northing), 1, max(northing)));
+
+% Reshape the grid into column vectors
+x = xGrid(:);
+y = yGrid(:);
+
+% Draw a polygon and get its vertices
+
+%% Add Multiple Obsticals
+
+%plot(x, y, '.');
+title('Draw Obstacle');
+
+roi = drawpolygon;
+obby = roi.Position;
+obst=obby;
+obst(size(obst,1)+1,1)=obst(1,1);
+obst(size(obst,1),2)=obst(1,2);
+
+hold off
+close
+
+figure;
+hold on
+plot(vert(:,1),vert(:,2),LineWidth=2)
+plot(enu(:,1),enu(:,2),Linewidth=2)
+plot(obst(:,1),obst(:,2))
+
+%% Cell Generation
+
+
+j=1;
+% creating discritization section from obby
+for i=1:2:size(obby,1)*2 
+    newvert(i,:) = [obby(j,1),max(vert(:,2))];
+    newvert(i+1,:) = [obby(j,1),min(vert(:,2))];
+    j=j+1;
+end
+
+% create discritation sections from outline
+%need new way to define
+j=1;
+for i= 1:size(vert)-2
+    longdif = abs(vert(i,1)-vert(i+1,1));
+    latdif= abs(vert(i,2)-vert(i+1,2));
+    ang=atan2(latdif,longdif);
+
+    longdif = abs(vert(i+1,1)-vert(i+2,1));
+    latdif= abs(vert(i+1,2)-vert(i+2,2));
+    ang2=atan2(latdif,longdif);
+
+    if  abs(ang-ang2) > .9 %|| abs(ang-ang2) < .05
+    newvert(size(newvert,1)+1,:) = [vert(i+1,1),max(vert(:,2))];
+    newvert(size(newvert,1)+1,:) = [vert(i+1,1),min(vert(:,2))];
+    end
+
+end
+
+% compile cells
+
+
+plot(newvert(:,1),newvert(:,2))
+legend('Thinned outline','USV Outline','Obstacle','cell generation')
+xlabel('easting (m)')
+ylabel('northing (m)')
+% polygons=coverageDecomposition(vert);
+% cs = uavCoverageSpace(vert);
+% takeoff = [vert(1,1),vert(1,2),0];
+% landing = [vert(1,1),vert(1,2),0];
+% cpMin = uavCoveragePlanner(cs,Solver="MinTraversal");
+
+
+
+%% Cell CPP and node placement
+
+
+
+
+
+%% TSP and Cell Weighting 
+%current version of tsp pairs 2 nodes of a city making the cost between
+%them zero
+
+%weights are asigned to nodes that travel outside of a bounded region
+
+%need to add obstical weights to this
+
+%These weights shouldn't be inf as a path can be planned 
+% afterword to confine them to C-space
+
+%may run multiple iterations with differet cell and node placements
+
+%% Output Planned Path
+
+
+
+
+
+

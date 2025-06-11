@@ -1,0 +1,589 @@
+%% test code prep %%
+
+clear
+clc
+close all
+
+%% To-Do
+%fix new corrected data legend/reformat depth data
+%add a function that cleans errors in outline+survey data
+
+
+% retroactively change raw data to corrected data
+% Fixed, corr and uncorrected data now is collected
+
+% get waypoints in UTM 17 or GPS coords
+% fixed (export .L84 waypoint file)
+
+
+%% add survey file names
+
+survey=readtable("TestData\Test_18\20line5ft.txt");
+raster20_5=readtable("TestData\Test_18\20_5rast.txt");
+depth20_5=-1*raster20_5.GALayerToRas1_Band_1;
+
+survey1=readtable("TestData\Test_18\1line100ft.txt");
+raster1_100=readtable("TestData\Test_18\1_100rast.csv");
+depth1_100=-1*raster1_100.GALayerToRas6_Band_1;
+
+survey2=readtable("TestData\Test_18\2line50ft.txt");
+raster2_50=readtable("TestData\Test_18\2_50rast.csv");
+depth2_50=-1*raster2_50.GALayerToRas5_Band_1;
+
+survey3=readtable("TestData\Test_18\3line33ft.txt");
+raster3_33=readtable("TestData\Test_18\3_33rast.csv");
+depth3_33=-1*raster3_33.GALayerToRas4_Band_1;
+
+survey4=readtable("TestData\Test_18\5line20ft.txt");
+raster5_20=readtable("TestData\Test_18\5_20rast.csv");
+depth5_20=-1*raster5_20.GALayerToRas3_Band_1;
+
+survey5=readtable("TestData\Test_18\10line10ft.txt");
+raster10_10=readtable("TestData\Test_18\10_10rast.csv");
+depth10_10=-1*raster10_10.GALayerToRas2_Band_1;
+
+path=readtable("TestData\Test_18\20_5.txt");
+
+wind=readtable("TestData\Test_18\winddata.log");
+%number of swaths, swathwidth, Distance traveled, time(s), file size kb
+testtable= [ 1 100 516 108 15.2; 2 50 724 225 20.2; 3 33 933 294 26.1; 5 20 1245 402 36.8; 10 10 2398 751 66.2 ; 20 5 4457 1491 126];
+
+
+%% convert GPS to (m)
+
+% refLat= 35.2271;  % Latitude of Charlotte, NC
+% refLon = -80.8431; % Longitude of Charlotte, NC
+% refAlt = 0;        % Altitude of Charlotte, NC 
+% 
+% 
+% enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+%% Swathwidths vs plots
+figure
+hold;
+plot(testtable(:,2)./3,testtable(:,3)./3,LineWidth=2)
+plot(testtable(:,2)./3,testtable(:,4),LineWidth=2)
+plot(testtable(:,2)./3,testtable(:,5),LineWidth=2)
+legend("Travel distance (m)","Survey time (sec)","File size (KB)",fontsize=12)
+xlabel("Swath Width (m)",fontsize=12)
+ylabel('Units',fontsize=12)
+title('Survey Logistics',fontsize=14)
+grid on
+
+
+
+% raster plots
+figure;
+scatter3(raster20_5.X, raster20_5.Y, depth20_5, 20, depth20_5, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('20 swaths');
+grid on;
+
+
+figure;
+scatter3(raster10_10.X, raster10_10.Y, depth10_10, 20, depth10_10, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('10 swaths');
+grid on;
+
+
+figure;
+scatter3(raster5_20.X, raster5_20.Y, depth5_20, 20, depth5_20, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('5 swaths');
+grid on;
+
+figure;
+scatter3(raster3_33.X, raster3_33.Y, depth3_33, 20, depth3_33, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('3 swaths');
+grid on;
+
+
+figure;
+scatter3(raster2_50.X, raster2_50.Y, depth2_50, 20, depth2_50, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('2 swaths');
+grid on;
+
+figure;
+scatter3(raster1_100.X, raster1_100.Y, depth1_100, 20, depth1_100, 'filled');
+colormap(jet);
+colorbar;
+
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('1 swath');
+grid on;
+
+
+%% Difference
+figure;
+subplot(3, 2, 1); 
+scatter3(raster20_5.X, raster20_5.Y, ((depth20_5-depth20_5).^2).^.5, 20, ((depth20_5-depth20_5).^2).^.5, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('20 swaths');
+grid on;
+
+
+subplot(3, 2, 2); 
+scatter3(raster10_10.X, raster10_10.Y, depth20_5-depth10_10, 20, depth20_5-depth10_10, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('10 swaths');
+grid on;
+
+
+subplot(3, 2, 3);
+scatter3(raster5_20.X, raster5_20.Y, depth20_5-depth5_20, 20, depth20_5-depth5_20, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('5 swaths');
+grid on;
+
+subplot(3, 2, 4); 
+scatter3(raster3_33.X, raster3_33.Y, depth20_5-depth3_33, 20, depth20_5-depth3_33, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('3 swaths');
+grid on;
+
+
+subplot(3, 2, 5); 
+scatter3(raster2_50.X, raster2_50.Y, depth20_5-depth2_50, 20, depth20_5-depth2_50, 'filled');
+colormap(jet);
+colorbar;
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('2 swaths');
+grid on;
+
+subplot(3, 2, 6); 
+scatter3(raster1_100.X, raster1_100.Y, depth20_5-depth1_100, 20, depth20_5-depth1_100, 'filled');
+colormap(jet);
+colorbar;
+
+xlabel('Longitude (DD)','FontSize',9);
+ylabel('Latitude (DD)','FontSize',9);
+ylabel(colorbar,'Depth (ft)','FontSize',9);
+zlabel('Altitude (ft)','FontSize',9);
+title('1 swath');
+grid on;
+
+
+
+% %% RMS Error
+% figure;
+% subplot(3, 2, 1); 
+% scatter3(raster20_5.X, raster20_5.Y, ((depth20_5-depth20_5).^2).^.5, 20, ((depth20_5-depth20_5).^2).^.5, 'filled');
+% colormap(jet);
+% colorbar;
+% xlabel('Longitude');
+% ylabel('Latitude');
+% zlabel('Depth');
+% title('20 swaths');
+% grid on;
+% 
+% 
+% subplot(3, 2, 2); 
+% scatter3(raster10_10.X, raster10_10.Y, ((depth20_5-depth10_10).^2).^.5, 20, ((depth20_5-depth10_10).^2).^.5, 'filled');
+% colormap(jet);
+% colorbar;
+% xlabel('Longitude');
+% ylabel('Latitude');
+% zlabel('Depth');
+% title('10 swaths');
+% grid on;
+% 
+% 
+% subplot(3, 2, 3);
+% scatter3(raster5_20.X, raster5_20.Y, ((depth20_5-depth5_20).^2).^.5, 20, ((depth20_5-depth5_20).^2).^.5, 'filled');
+% colormap(jet);
+% colorbar;
+% xlabel('Longitude');
+% ylabel('Latitude');
+% zlabel('Depth');
+% title('5 swaths');
+% grid on;
+% 
+% subplot(3, 2, 4); 
+% scatter3(raster3_33.X, raster3_33.Y, ((depth20_5-depth3_33).^2).^.5, 20, ((depth20_5-depth3_33).^2).^.5, 'filled');
+% colormap(jet);
+% colorbar;
+% xlabel('Longitude');
+% ylabel('Latitude');
+% zlabel('Depth');
+% title('3 swaths');
+% grid on;
+% 
+% 
+% subplot(3, 2, 5); 
+% scatter3(raster2_50.X, raster2_50.Y, ((depth20_5-depth2_50).^2).^.5, 20, ((depth20_5-depth2_50).^2).^.5, 'filled');
+% colormap(jet);
+% colorbar;
+% xlabel('Longitude');
+% ylabel('Latitude');
+% zlabel('Depth');
+% title('2 swaths');
+% grid on;
+% 
+% subplot(3, 2, 6); 
+% scatter3(raster1_100.X, raster1_100.Y, ((depth20_5-depth1_100).^2).^.5, 20, ((depth20_5-depth1_100).^2).^.5, 'filled');
+% colormap(jet);
+% colorbar;
+% 
+% xlabel('Longitude');
+% ylabel('Latitude');
+% zlabel('Depth');
+% title('1 swath');
+% grid on;
+
+
+
+
+% RMS
+depth={depth20_5,depth10_10,depth5_20,depth3_33,depth2_50,depth1_100};
+
+num_depth = length(depth);
+rms_matrix = zeros(num_depth, num_depth);
+
+% rms_10_10=sqrt(mean((depth20_5-depth10_10).^2,"all"));
+
+for i = 1:num_depth
+    for j = i+1:num_depth
+
+        rms_matrix(i,j)=sqrt(mean((depth{i}-depth{j}).^2,"all"));
+        rms_matrix(j,i)=rms_matrix(i, j);  
+    end
+end
+
+
+
+
+[X, Y] = meshgrid(flip(testtable(:,2)), flip(testtable(:,2)));
+
+% figure;
+% surf(X, Y, rms_matrix, 'EdgeColor', 'none'); 
+% colormap(jet); 
+% colorbar; 
+% xlabel('Swath width');
+% ylabel('Swath width');
+% title('RMS Error for different swathing widths');
+% grid on;
+
+figure;
+hold on
+coverage=[137.482;182.036;238.896;344.849;614.156;1175.497];
+coverageper=coverage./20900;
+plot(coverageper(:,1)*100,flip(rms_matrix(:,1)),linewidth=2,color='k')
+scatter(coverageper(:,1)*100,flip(rms_matrix(:,1)),'k','+',linewidth=2)
+xlabel("Echosounder Footprint Coverage %")
+ylabel("RMS Error (ft)")
+legend('Relative RMS')
+title("RMS Error vs Total Coverage")
+
+
+
+
+
+
+
+% Coverage of Area
+
+%convert GPS to (m)
+
+refLat= 35.2271;  % Latitude of Charlotte, NC
+refLon = -80.8431; % Longitude of Charlotte, NC
+refAlt = 0;        % Altitude of Charlotte, NC 
+
+long0 = survey.GPSLongitude;
+lat0 = survey.GPSLatitude;
+alt0 = survey.GPSElevation;
+
+enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+
+enu(:,1)=(enu(:,1)-min(enu(:,1)))*3.28;
+enu(:,2)=(enu(:,2)-min(enu(:,2)))*3.28;
+
+
+
+bw=5; %beamwidth 
+%beam width spec 5degrees/26degrees
+bw=bw/2;
+bw= deg2rad(bw);
+
+radius=survey.Corr_Depth2*tan(bw);
+theta = linspace(0, 2*pi, 100);
+
+x = polyshape();
+polyarea=0;
+
+figure;
+hold on
+for i= 1:size(radius)
+x_circle = enu(i,2) + radius(i) * cos(theta);
+y_circle = enu(i,1) + radius(i) * sin(theta);
+
+circle_poly = polyshape(x_circle, y_circle);
+polyarea = polyarea+area(circle_poly);
+
+plot(x_circle,y_circle,'linewidth',2,'color','r')
+
+end
+plot(enu(:,2),enu(:,1),'linewidth',1,'color','k')
+xlabel('X axis (ft)')
+ylabel('Y axis (ft)')
+title('Echosounder Footprint')
+a = polyarea;
+legend('Echosounder Footprint')
+text(-15, -25, sprintf('Total area covered: %.3f ft\nTotal area 20900 ft', a), 'FontSize', 12, 'Color', 'k');
+
+hold off
+
+
+% %% DOL
+% 
+% 
+% distanceoffline = survey.DOL;
+% maxdis=max(abs(distanceoffline));
+% %buffer for max DOL calculation
+% if maxdis > 5 
+%     maxdis=5;
+% end
+% 
+% for p=1:length(survey.DOL)
+%     if survey.DOL(p)>maxdis || survey.DOL(p)<-maxdis
+%        survey.DOL(p) = 0;
+%     end
+% end
+% 
+% 
+% figure;
+% hold on
+% 
+% survey.DOL= abs(survey.DOL);
+% z_norm = (survey.DOL - min(survey.DOL)) / ((max(abs(survey.DOL))));
+% z_color = interp1(linspace(0,1,size(jet,1)),jet,z_norm);
+% 
+% for k=1:length(survey.GPSLongitude)-1
+%     plot(survey.GPSLongitude(k:k+1),survey.GPSLatitude(k:k+1),'Color',z_color(k,:),"linewidth",3)
+%     %fprintf('loop ran %f\n',k)
+% end
+% scatter(path.Var3,path.Var2,'r',"linewidth",1,"Marker","+")
+% colorbar;
+% colormap(jet)
+% clim([min(survey.DOL) 3])
+% xlabel("Longitude (DD)")
+% ylabel("Latitude (DD)")
+% xlabel(colorbar, 'Distance (ft)');
+% title("Waypoint Deviation")
+% axis equal
+% 
+% 
+% figure;
+% hold on
+% subplot(2,1,1)
+% plot(survey.Time,survey.DOL,"k")
+% yline(0,"r-")
+% xlabel("Time")
+% ylabel("Distance (ft)")
+% title("Distance off Line")
+% subplot(2,1,2)
+% plot(survey.Time,survey.DBL,"k")
+% title("Distance from Begining Line")
+% xlabel("Time")
+% ylabel("Distance (ft)")
+% sgtitle("Distance From Waypoints")
+% hold off
+% 
+% 
+% %% IMU Measurment
+% figure;
+% hold on
+% plot(survey.Time, survey.Pitch)
+% plot(survey.Time, survey.Roll)
+% plot(survey.Time, survey.COG-180)
+% legend("Pitch","Roll","Yaw")
+% title("IMU measurments")
+% xlabel("Time")
+% ylabel("Angle Degrees")
+% hold off
+% 
+% 
+% 
+% %% Depth
+% rawerror= abs(survey.RawDepth1-survey.RawDepth2);
+% correrror= abs(survey.Corr_Depth1-survey.Corr_Depth2);
+% lowerror= abs(survey.RawDepth1-survey.Corr_Depth1);
+% higherror= abs(survey.RawDepth2-survey.Corr_Depth2);
+% 
+% 
+% figure;
+% hold on 
+% plot(survey.Time, survey.Corr_Depth1,"color","b","LineWidth",2)
+% plot(survey.Time, survey.Corr_Depth2,"color","r","LineWidth",2)
+% plot(survey.Time, survey.RawDepth1,"color","[0,.5,1]","LineStyle","--")
+% plot(survey.Time, survey.RawDepth2,"color","[1,.2,0]","LineStyle","--")
+% plot(survey.Time, rawerror,"color","k")
+% %hold off
+% %plot(survey.Time, correrror)
+% legend("High Freq Corr","Low Freq Corr","High Freq Raw","Low Freq Raw", "Difference")
+% title("Corrected Dual Frequency Echosounder")
+% xlabel("Time")
+% ylabel("Depth (ft)")
+% 
+% 
+% 
+% % plot(survey.Time, lowerror)
+% % plot(survey.Time, higherror)
+% % rectoactively change raw data to inclued corrections???
+% 
+% hold off
+% 
+% %% Depth pos plot %%
+% survey.Corr_Depth2= abs(survey.Corr_Depth2);
+% z_norm = ((survey.Corr_Depth2) - min(survey.Corr_Depth2)) / ((max(abs(survey.Corr_Depth2))- min(survey.Corr_Depth2)));
+% cmap=jet(256);
+% 
+% %z_norm=ones(363,1); %only uncomment if #of sats is same thru test
+% 
+% 
+% z_color = interp1(linspace(0,1,size(jet,1)),jet,z_norm);
+% 
+% figure;
+% hold on
+% for k=1:length(survey.GPSLongitude)-1
+%     plot(survey.GPSLongitude(k:k+1),survey.GPSLatitude(k:k+1),'Color',z_color(k,:),"linewidth",3)
+%     %fprintf('loop ran %f\n',k)
+% end
+% 
+% scatter(path.Var3,path.Var2,'r',"linewidth",1,"Marker","+")
+% colorbar;
+% colormap(jet)
+% clim([min(survey.Corr_Depth2) max(survey.Corr_Depth2)])
+% %caxis([0 max(survey.NumSats)]) only uncommmetn if sat# is the same
+% 
+% xlabel("Longitude (DD)")
+% ylabel("Latitude (DD)")
+% ylabel(colorbar,"Depth (ft)")
+% title("Low Frequency Depth")
+% axis equal
+% hold off
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% %% GNSS Satiltie in view
+% 
+% 
+% survey.NumSats= abs(survey.NumSats);
+% z_norm = ((survey.NumSats) - min(survey.NumSats)) / ((max(abs(survey.NumSats))- min(survey.NumSats)));
+% cmap=jet(256);
+% 
+% %z_norm=ones(363,1); %only uncomment if #of sats is same thru test
+% 
+% z_color = interp1(linspace(0,1,size(jet,1)),jet,z_norm);
+% 
+% 
+% figure;
+% hold on
+% for k=1:length(survey.GPSLongitude)-1
+%     plot(survey.GPSLongitude(k:k+1),survey.GPSLatitude(k:k+1),'Color',z_color(k,:),"linewidth",3)
+%     %fprintf('loop ran %f\n',k)
+% end
+% scatter(path.Var3,path.Var2,'r',"linewidth",1,"Marker","+")
+% colorbar;
+% colormap(jet)
+% clim([min(survey.NumSats) max(survey.NumSats)])
+% %caxis([0 max(survey.NumSats)]) only uncommmetn if sat# is the same
+% 
+% xlabel("Longitude (DD)")
+% ylabel("Latitude (DD)")
+% ylabel(colorbar,'Number of Satellites')
+% title("GNSS Satellites in Sky View")
+% axis equal
+% %DOL Distance off Line
+% %DBL Distance Begining Line
+% %add error for waypoints vs position
+% hold off
+% 
+% %% GPS Health 
+% 
+% numsatavg=mean(survey.NumSats);
+% 
+% figure; 
+% hold on
+% subplot(1,3,1);
+% plot(survey.Time,survey.GPSMode,"k")
+% xlabel("Time")
+% ylabel("GPS mode")
+% title("ASV GPS Mode")
+% 
+% subplot(1,3,2)
+% plot(survey.Time,survey.Dop,"k")
+% xlabel("Time")
+% ylabel("dop")
+% title("ASV Dilution of precision")
+% 
+% subplot(1,3,3)
+% plot(survey.Time,survey.NumSats,"k")
+% yline(numsatavg,"b")
+% xlabel("Time")
+% ylabel("# of sats")
+% title("ASV # of Satellites")
+
+
+

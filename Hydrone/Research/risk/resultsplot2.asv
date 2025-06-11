@@ -1,0 +1,141 @@
+clc
+clear
+close all
+
+load('test25_data.mat')
+survey = readtable('TestData\Data\test25\surveyA1_low.txt');
+survey2 = readtable('TestData\Data\test26\logdataA.csv');
+survey= survey (630:5:end-650,:);
+survey2= survey2 (1500:5:end-20050,:);
+
+outline=readtable("TestData\Test_25\DATALOG.txt");
+outline = outline(200:850,:);
+lat0 = outline.lat .*10^-7;
+long0= outline.lon .*10^-7;
+alt0 = zeros(size(lat0));
+
+
+%DD -> meters (m)
+refLat= min(lat0);  % Latitude of Charlotte, NC
+refLon = min(long0); % Longitude of Charlotte, NC
+refAlt = 0;        % Altitude of Charlotte, NC 
+
+enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+
+lat0=enu(:,1) ;%- 99.0553;%-minlat;
+lon0=enu(:,2);%- 48.5940;%-minlon;
+
+R = [cos(rotationangle), -sin(rotationangle); sin(rotationangle), cos(rotationangle)];
+rotpoint = R*[lat0';lon0'];
+
+easting=rotpoint(1,:)';
+northing=rotpoint(2,:)';
+
+%plot(survey.GPSLatitude,survey.GPSLongitude)
+
+
+
+
+buff = 2.3;
+
+figure;
+hold on
+plot(lat0(:,1),long0(:,1))
+plot(polyroi,'facecolor','k','facealpha',.4)
+newregion = polybuffer(polyroi,-buff-.4);
+plot(newregion,'facecolor','b','facealpha',.1)
+
+for i=1:numel(ObsticalVertices)
+obby(i) = polyshape(ObsticalVertices{1,i}(:,1),ObsticalVertices{1,i}(:,2));
+%obby(i)=polybuffer(obby(i),1.5);
+
+buffobby(i) = polybuffer(obby(i),buff);%+1.5
+plot(buffobby(i),'facecolor','k','facealpha',.2)
+plot(obby(i),'facecolor','r','facealpha',.2);
+end
+
+% refLat= 35.2271;  % Latitude of Charlotte, NC
+% refLon = -80.8431; % Longitude of Charlotte, NC
+% refAlt = 0;        % Altitude of Charlotte, NC 
+
+%plot(easting,northing,'g')
+
+
+lat0=WGS1984(:,1);
+long0=WGS1984(:,2);
+alt0=WGS1984(:,2);
+
+enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+minlat=min(enu(:,1));
+minlon=min(enu(:,2));
+
+weast=enu(:,1) ;%- 99.0553;%-minlat;
+wwest=enu(:,2);%- 48.5940;%-minlon;
+
+R = [cos(rotationangle), -sin(rotationangle); sin(rotationangle), cos(rotationangle)];
+rotpoint = R*[weast';wwest'];
+
+easting=rotpoint(1,:)';
+northing=rotpoint(2,:)';
+
+%plot(survey.GPSLatitude,survey.GPSLongitude)
+plot(easting+,northing,'r',linestyle='--')
+
+
+
+
+
+
+lat0=survey.GPSLatitude;
+long0=survey.GPSLongitude;
+alt0=zeros(1,size(survey.GPSLatitude,1))';
+
+
+
+enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+minlat=min(enu(:,1));
+minlon=min(enu(:,2));
+
+survey.GPSLatitude=enu(:,1) ;%- 99.0553;%-minlat;
+survey.GPSLongitude=enu(:,2);%- 48.5940;%-minlon;
+
+R = [cos(rotationangle), -sin(rotationangle); sin(rotationangle), cos(rotationangle)];
+rotpoint = R*[survey.GPSLatitude';survey.GPSLongitude'];
+
+easting=rotpoint(1,:)';
+northing=rotpoint(2,:)';
+
+%plot(survey.GPSLatitude,survey.GPSLongitude)
+plot(easting+20,northing-10,'k',LineWidth=2)
+
+lat0=survey2.GPSLatitude;
+long0=survey2.GPSLongitude;
+alt0=zeros(1,size(survey2.GPSLatitude,1))';
+
+
+
+enu = lla2enu([lat0, long0, alt0], [refLat, refLon, refAlt], 'ellipsoid');
+
+minlat=min(enu(:,1));
+minlon=min(enu(:,2));
+
+survey2.GPSLatitude=enu(:,1) ;%- 99.0553;%-minlat;
+survey2.GPSLongitude=enu(:,2);%- 48.5940;%-minlon;
+
+R = [cos(rotationangle), -sin(rotationangle); sin(rotationangle), cos(rotationangle)];
+rotpoint = R*[survey2.GPSLatitude';survey2.GPSLongitude'];
+
+easting=rotpoint(1,:)';
+northing=rotpoint(2,:)';
+
+%plot(survey.GPSLatitude,survey.GPSLongitude)
+%plot(easting,northing,'b')
+
+xlabel('X (m)',FontSize=12)
+ylabel('Y (m)',FontSize=12)
+title('Risk-Aware Path Plan',Fontsize=14)
+
+axis equal

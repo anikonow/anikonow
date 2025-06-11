@@ -1,0 +1,168 @@
+%% Hydrone_run_testing %%
+
+clc
+clear
+close all
+
+survey=readtable("TestData\Test_17\refrun.txt");
+run1=readtable("TestData\Test_17\run1.txt");
+run2=readtable("TestData\Test_17\run2.txt");
+run3=readtable("TestData\Test_17\run3.txt");
+run4=readtable("TestData\Test_17\run4.txt");
+run5=readtable("TestData\Test_17\run5.txt");
+run6=readtable("TestData\Test_17\run6.txt");
+
+table = [
+35.35309347	1.79	2.32	2.39	2.33	2.46	2.47	2.5	2.47	2.53	2.3	2.41	2.35	2.45	2.28	2.8 2.3138
+35.3529353	3.05	3.88	4.12	3.82	4.1	4.1	4.4	3.9	4.2	3.73	4.07	3.75	4.07	3.73	4.41 3.86965
+35.35277623	4.43	5.07	5.31	5.01	5.39	4.93	5.65	4.86	5.2	4.84	5.49	4.84	5.37	4.77	5.34 5.05648
+35.35262501	5.23	5.96	6.33	6.08	6.85	5.71	6.1	5.84	6.27	5.92	6.91	5.89	6.43	5.83	6.42 5.944106
+35.35250981	5.54	6.24	6.51	6.24	7.06	6.02	6.32	6.21	6.52	6.2	6.73	6.17	6.77	6.21	6.6 6.2233
+];
+
+figure;
+hold on
+plot(table(:,1),table(:,2),'k',LineWidth=2)
+plot(run1.GPSLatitude,run1.Corr_Depth1,'r',LineWidth=2)
+plot(run5.GPSLatitude,run5.Corr_Depth1,'g',LineWidth=2)
+plot(run6.GPSLatitude,run6.Corr_Depth1,'b',LineWidth=2)
+plot(run1.GPSLatitude,run1.Corr_Depth2,'r',LineWidth=2,LineStyle='--')
+plot(run5.GPSLatitude,run5.Corr_Depth2,'g',LineWidth=2,LineStyle='--')
+plot(run6.GPSLatitude,run6.Corr_Depth2,'b',LineWidth=2,LineStyle='--')
+legend('Manual','Run 1','Run 2','Run 3',fontsize=12)
+xlabel('Latitude (DD)',FontSize=12)
+ylabel('Depth (m)',FontSize=12)
+title('Echosounder Trials',FontSize=14)
+
+
+%% indexing
+% for k = 1:length(survey.GPSLongitude)
+%     % Plot each point on the XY plot
+%     plot(survey.GPSLongitude(k), survey.GPSLatitude(k), 'bo', 'MarkerSize', 10);
+%     hold on; % Keep the plot so that all points are plotted on the same figure
+% 
+%     % Annotate each point with its index
+%     text(survey.GPSLongitude(k), survey.GPSLatitude(k), sprintf('%d', k), ...
+%         'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right', 'FontSize', 12);
+% end
+% 
+% colorbar;
+% colormap(jet)
+% clim([min(survey.DOL) 3])
+% xlabel("Longitude")
+% ylabel("Latitude")
+% title("inexing")
+
+% hold on
+% plot(run1.GPSLatitude,run1.Corr_Depth1)
+% plot(run1.GPSLatitude,run1.Corr_Depth2)
+% plot(table(:,1),table(:,2))
+% legend("high","low","ref")
+% hold off
+
+figure
+hold on
+plot(table(:,1),table(:,2),LineWidth=2)
+scatter(table(:,1),table(:,3))
+%scatter(table(:,1),table(:,4))
+plot(table(:,1),table(:,5))
+plot(table(:,1),table(:,7))
+plot(table(:,1),table(:,9))
+plot(table(:,1),table(:,11))
+plot(table(:,1),table(:,13))
+plot(table(:,1),table(:,15))
+plot(table(:,1),table(:,17))
+
+ylabel("Depth (m)")
+xlabel("Latitude")
+title("Depth Profile")
+legend("True Depth","High Frequency","run 1","run 2","run 3","run 4","run 5","run 6")
+% 
+% 
+% hold off
+% 
+% a0=table(:,3)-table(:,2);
+% a1=table(:,5)-table(:,2);
+% a2=table(:,7)-table(:,2);
+% a3=table(:,9)-table(:,2);
+% a4=table(:,11)-table(:,2);
+% a5=table(:,13)-table(:,2);
+% a6=table(:,15)-table(:,2);
+
+% figure
+% hold on
+% plot(run1.GPSLongitude(1:25,:),run1.Corr_Depth1(1:25,:))
+% plot(run2.GPSLongitude(27:51,:),run2.Corr_Depth1(27:51,:))
+% plot(run3.GPSLongitude(1:25,:),run3.Corr_Depth1(1:25,:))
+% plot(run4.GPSLongitude(25:48),run4.Corr_Depth1(25:48,:))
+% plot(run5.GPSLongitude(1:23,:),run5.Corr_Depth1(1:23,:))
+% plot(run6.GPSLongitude(1:18,:),run6.Corr_Depth1(1:18,:))
+% ylabel("Depth (ft)")
+% xlabel("Latitude (DD)")
+% title("Echosounder Run")
+% legend("run 1","run 2","run 3","run 4","run 5","run 6")
+% 
+% hold off
+
+
+
+
+
+%% Depth
+rawerror= abs(survey.RawDepth1-survey.RawDepth2);
+correrror= abs(survey.Corr_Depth1-survey.Corr_Depth2);
+lowerror= abs(survey.RawDepth1-survey.Corr_Depth1);
+higherror= abs(survey.RawDepth2-survey.Corr_Depth2);
+
+
+figure;
+hold on 
+plot(survey.Time, survey.Corr_Depth1,"color","b","LineWidth",2)
+plot(survey.Time, survey.Corr_Depth2,"color","r","LineWidth",2)
+plot(survey.Time, survey.RawDepth1,"color","[0,.5,1]","LineStyle","--")
+plot(survey.Time, survey.RawDepth2,"color","[1,.2,0]","LineStyle","--")
+plot(survey.Time, rawerror,"color","k")
+%hold off
+%plot(survey.Time, correrror)
+legend("High Freq Corr","Low Freq Corr","High Freq Raw","Low Freq Raw", "Difference")
+title("Corrected Dual Frequency Echosounder")
+xlabel("Time")
+ylabel("Depth (ft)")
+
+avgdif= sum(rawerror)/size(survey.Time,1)
+
+hold off
+
+
+%% Depth with Settings %%
+% Define the factors and response
+% FactorA = [1, 1, 1, 2, 2, 2]'; % Threshold
+% FactorB = [1, 2, 3, 1, 2, 3]'; % Gain
+% Response = [.3910, .2196, .1437, .1850, .1480, .1069 ]';
+% 
+% 
+% Table=[FactorA,FactorB,Response];
+% 
+% % Perform two-way ANOVA
+% [p, tbl, stats] = anovan(Response, {FactorA, FactorB}, 'model', 'interaction', 'varnames', {'FactorA', 'FactorB'});
+% 
+% % Display the ANOVA table
+% disp(tbl);
+
+
+%% Speed Test %%
+% FactorA = [1, 1, 1, 2, 2, 2]'; % 2 levels
+% FactorB = [1, 2, 3, 1, 2, 3]'; % 3 levels
+% Response = [1.009, .998, 1.002, 1.015, .998, .995]'; 
+% 
+% 
+% % Perform two-way ANOVA
+% [p, tbl, stats] = anovan(Response, {FactorA, FactorB}, 'model', 'interaction', 'varnames', {'Set Speed', 'Throttle %'});
+% 
+% % Display ANOVA table results
+% disp('ANOVA Table:');
+% disp(tbl);
+% 
+% 
+% % Visualize the interaction effect using interactionplot
+% interactionplot(Response, {FactorA, FactorB});

@@ -1,0 +1,41 @@
+clear
+clc
+close all
+
+
+% Define mean and covariance
+mu = [0, 0]; % Mean vector [mu_x, mu_y]
+sigma_x = 5;  % Standard deviation in x
+sigma_y = 5;  % Standard deviation in y
+rho = 0.5;    % Correlation coefficient
+
+% Construct the covariance matrix
+Sigma = [sigma_x, 4; 
+         1, sigma_y];
+
+% Define grid for x and y values
+x_range = linspace(-3*sigma_x, 3*sigma_x, 100);
+y_range = linspace(-3*sigma_y, 3*sigma_y, 100);
+[X, Y] = meshgrid(x_range, y_range);
+
+% Compute the bivariate Gaussian PDF
+X_vector = [X(:) Y(:)]; % Convert grid to vector form
+pdf_values = mvnpdf(X_vector, mu, Sigma); % Compute PDF
+pdf_values = reshape(pdf_values, size(X)); % Reshape back to grid form
+
+% Plot the 3D surface
+figure;
+surf(X, Y, pdf_values, 'EdgeColor', 'none'); % Smooth surface plot
+colormap('parula'); % Color scheme
+colorbar; % Show color legend
+
+% Labels and title
+xlabel('X');
+ylabel('Y');
+zlabel('Probability Density');
+title('PDF of Agent Position');
+
+% Improve visualization
+shading interp; % Smooth shading
+view(30, 30); % Adjust view angle
+grid on;

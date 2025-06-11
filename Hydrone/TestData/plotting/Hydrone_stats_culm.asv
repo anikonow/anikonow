@@ -1,0 +1,149 @@
+%% Culm test report %%
+
+
+close all
+clc
+clear
+
+
+culm=readtable("TestData\Quarter_data\Q6.csv");
+
+figure;
+hold on
+plot(culm.ID,culm.portloss,"Color","b","marker","+");
+plot(culm.ID,culm.stbdloss,"Color","r","marker","+");
+%add rc loss %
+legend("Port Battery Loss %","STBD Battery Loss %")
+ylabel("Battery Drain %")
+xlabel("Test ID")
+title("Battery Loss")
+hold off
+
+%%
+
+%battery loss vs survey time
+battloss=(culm.portloss+culm.stbdloss)/2;
+
+portco=polyfit(culm.surveytime,culm.portloss,1);
+portx=linspace(min(culm.surveytime),max(culm.surveytime),1000);
+porty=polyval(portco,portx);
+
+stbdco=polyfit(culm.surveytime,culm.stbdloss,1);
+stbdx=linspace(min(culm.surveytime),max(culm.surveytime),1000);
+stbdy=polyval(stbdco,stbdx);
+
+figure;
+hold on
+%scatter(culm.surveytime,battloss,"black")
+scatter(culm.surveytime,culm.portloss,"blue")
+plot(portx,porty,"color","b")
+
+scatter(culm.surveytime,culm.stbdloss,"red")
+plot(stbdx,stbdy,"color","r")
+
+xlabel("Survey Duration (mins)")
+ylabel("Battery Drain %")
+
+ylim([0,max(culm.portloss)+5]);
+legend("Port battery","Port LoBF","STBD battery","STBD LoBF","Location","northwest")
+title("Battery Loss vs Survey Duration")
+
+%setuptime vs test id (show team size in color) test 5 3 people
+figure;
+hold on
+for i=1:size(culm.TeamSize)
+    if culm.TeamSize(i)<=1
+        numcolor="blue";
+    elseif culm.TeamSize(i)==2
+        numcolor="green";
+    elseif culm.TeamSize(i)==3
+        numcolor="red";
+    end
+    scatter(culm.ID(i),culm.setuptime(i),numcolor,"marker","o","LineWidth",2);
+end
+yline(mean(culm.setuptime),"k")
+%add rc loss %
+
+ylim([0,max(culm.setuptime)+5])
+ylabel("Setup Time (min)")
+xlabel("Test ID")
+title("Setup Time")
+hold off
+
+
+
+%packuptime vs test id
+
+i=1;
+
+figure;
+hold on
+scatter(culm.ID(i),culm.packtime(i),"red","marker","o","LineWidth",2);
+scatter(culm.ID(i),culm.packtime(i),"green","marker","o","LineWidth",2);
+scatter(culm.ID(i),culm.packtime(i),"blue","marker","o","LineWidth",2);
+for i=1:size(culm.TeamSize)
+    if culm.TeamSize(i)<=1
+        numcolor="blue";
+    elseif culm.TeamSize(i)==2
+        numcolor="green";
+    elseif culm.TeamSize(i)==3
+        numcolor="red";
+    end
+    scatter(culm.ID(i),culm.packtime(i),numcolor,"marker","o","LineWidth",2);
+end
+yline(mean(culm.packtime),"k")
+%add rc loss %
+
+ylim([0,max(culm.packtime)+5])
+ylabel("Packing Time (min)",fontsize=)
+xlabel("Test ID")
+title("Packup Time")
+legend('3 Surveyor','2 Surveyor','1 Surveyor')
+hold off
+
+
+%% total time vs test id
+figure;
+hold on
+plot(culm.ID,culm.totaltime,"Color","k","marker","+");
+plot(culm.ID,culm.surveytime,"Color","r","marker","+");
+legend("Total Onsite Time","Total Survey Time")
+xlabel("Test ID")
+ylabel("Duration (mins)")
+title("Survey Time")
+ylim([0,max(culm.totaltime)+5])
+hold off
+
+
+
+%add rcv vs asv vs both in colors
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% setup and packup time vs tempature
+% 
+% figure;
+% hold on
+% scatter(culm.Temp_F_,culm.setuptime,"blue")
+% scatter(culm.Temp_F_,culm.packtime,"red")
+% legend("Setup Time","Packup Time")
+% xlabel("Tempature F")
+% ylabel("Time (mins)")
+% title("Tempature vs Setup")

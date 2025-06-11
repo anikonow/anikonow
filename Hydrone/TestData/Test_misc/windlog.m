@@ -1,0 +1,63 @@
+clear 
+close all
+clc
+
+fileID = fopen('TestData\Test_18\winddata.log');
+C = textscan(fileID, '%s %f %s %f %s %f %s %f %s %f %s %f %s %f %s %f %s %f %s %f %s %f');
+fclose(fileID);
+
+% S  02.33 D  277 U  02.28 V -00.26 W  00.38 T  21.10 H  55.75 P  1014.52 PI -006.0 RO  002.7 MD  353 
+
+% unpack cell array
+numSamples = length(C{1});
+dt = 0.2;
+time = [0:dt:dt*(numSamples-1)]';
+windSpeed = C{2};
+windDirection = C{4};
+uVector = C{6};
+vVector = C{8};
+wVector = C{10};
+temperature = C{12};
+
+% plot 
+figure;
+subplot(3,2,1)
+plot(time, windSpeed)
+
+subplot(3,2,2)
+plot(time, windDirection)
+
+subplot(3,2,3)
+plot(time, uVector)
+
+subplot(3,2,4)
+plot(time, vVector)
+
+subplot(3,2,5)
+plot(time, wVector)
+
+subplot(3,2,6)
+plot(time, temperature)
+
+% figure;
+% periodogram(time, windSpeed);
+
+windDirection=rad2deg(windDirection);
+wind_rose(windDirection,windSpeed)
+
+function wind_rose(wind_direction,wind_speed)
+%WIND_ROSE Plot a wind rose
+%   this plots a wind rose
+figure
+pax = polaraxes;
+polarhistogram(deg2rad(wind_direction(wind_speed< 5)),deg2rad(0:10:360),'displayname',' > .8 m/s')
+hold on
+polarhistogram(deg2rad(wind_direction(wind_speed<.8)),deg2rad(0:10:360),'FaceColor','red','displayname','0.8-0.6 m/s')
+polarhistogram(deg2rad(wind_direction(wind_speed<.6)),deg2rad(0:10:360),'FaceColor','yellow','displayname','0.6-0.4 m/s')
+polarhistogram(deg2rad(wind_direction(wind_speed<.4)),deg2rad(0:10:360),'FaceColor','green','displayname','0.4-0.2 m/s')
+polarhistogram(deg2rad(wind_direction(wind_speed<.2)),deg2rad(0:10:360),'FaceColor','blue','displayname','0.2-0 m/s')
+pax.ThetaDir = 'clockwise';
+pax.ThetaZeroLocation = 'top';
+legend('Show')
+title('Wind Rose')
+end
